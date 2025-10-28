@@ -1,6 +1,8 @@
 export default async function handler(req, res) {
   try {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method Not Allowed' });
+    }
 
     const { messages } = req.body || {};
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -8,18 +10,25 @@ export default async function handler(req, res) {
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: 'Missing OPENROUTER_API_KEY' });
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Missing OPENROUTER_API_KEY' });
+    }
 
-    const model = 'meta-llama/llama-3.1-8b-instruct:free';
+    const model = 'meta-llama/llama-3.1-8b-instruct:free'; // 也可：'google/gemma-2-9b-it:free' 或 'openrouter/auto'
     const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
+        // 下面两个可选，但推荐填写，提升稳定性
         'HTTP-Referer': process.env.APP_PUBLIC_URL || 'https://vercel.app',
         'X-Title': 'My Chatbot'
       },
-      body: JSON.stringify({ model, messages, temperature: 0.7 })
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7
+      })
     });
 
     if (!resp.ok) {
