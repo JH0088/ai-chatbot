@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI伴侣 - 极简陪伴APP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            max-width: 500px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background-color: white;
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: white;
+            margin: 10px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .ai-message .avatar {
+            background-color: #667eea;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .user-message {
+            justify-content: flex-end;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.4;
+        }
+        
+        .ai-message .message-content {
+            background-color: #f1f5f9;
+            border-bottom-left-radius: 5px;
+            color: #4a5568;
+        }
+        
+        .user-message .message-content {
+            background-color: #667eea;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .input-area {
+            padding: 15px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            outline: none;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        
+        .send-button {
+            background-color: #667eea;
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .send-button:hover {
+            background-color: #5a6fd8;
+        }
+        
+        .bottom-nav {
+            display: flex;
+            background-color: white;
+            border-radius: 25px 25px 0 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            padding: 10px 20px;
+            margin-top: auto;
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 0;
+            color: #a0aec0;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .nav-item.active {
+            color: #667eea;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        
+        .nav-label {
+            font-size: 12px;
+        }
+        
+        .page {
+            display: none;
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .settings-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        
+        .profile-header {
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background-color: #f1f5f9;
+            border-radius: 18px;
+            border-bottom-left-radius: 5px;
+            width: fit-content;
+            margin-bottom: 15px;
+        }
+        
+        .typing-dots {
+            display: flex;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #a0aec0;
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AI伴侣</h1>
+    </div>
+    
+    <!-- 聊天页面 -->
+    <div class="page active" id="chat-page">
+        <div class="chat-container" id="chat-container">
+            <div class="message ai-message">
+                <div class="avatar">AI</div>
+                <div class="message-content">
+                    你好！我是你的AI伴侣，随时在这里陪伴你。今天过得怎么样？
+                </div>
+            </div>
+            
+            <div class="message user-message">
+                <div class="message-content">
+                    还不错，刚刚完成了一项工作。
+                </div>
+            </div>
+            
+            <div class="message ai-message">
+                <div class="avatar">AI</div>
+                <div class="message-content">
+                    真棒！完成工作后感觉如何？要不要和我分享一些细节？
+                </div>
+            </div>
+            
+            <div class="typing-indicator" id="typing-indicator">
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" class="message-input" id="message-input" placeholder="输入消息...">
+            <button class="send-button" id="send-button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22,2 15,22 11,13 2,9"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <!-- 设置页面 -->
+    <div class="page" id="settings-page">
+        <div class="settings-item">
+            <span>AI名称</span>
+            <span style="color: #667eea;">小悦</span>
+        </div>
+        <div class="settings-item">
+            <span>声音设置</span>
+            <span style="color: #667eea;">温柔女声</span>
+        </div>
+        <div class="settings-item">
+            <span>个性设置</span>
+            <span style="color: #667eea;">温暖陪伴型</span>
+        </div>
+        <div class="settings-item">
+            <span>通知设置</span>
+            <span style="color: #667eea;">开启</span>
+        </div>
+        <div class="settings-item">
+            <span>深色模式</span>
+            <span style="color: #667eea;">关闭</span>
+        </div>
+        <div class="settings-item">
+            <span>数据隐私</span>
+            <span style="color: #667eea;">管理</span>
+        </div>
+    </div>
+    
+    <!-- 个人资料页面 -->
+    <div class="page" id="profile-page">
+        <div class="profile-header">
+            <div class="profile-avatar">AI</div>
+            <h2>小悦</h2>
+            <p style="color: #718096; margin-top: 5px;">你的专属AI伴侣</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value">128</div>
+                <div class="stat-label">互动天数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">2,547</div>
+                <div class="stat-label">对话次数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">98%</div>
+                <div class="stat-label">陪伴度</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <div class="settings-item">
+                <span>创建时间</span>
+                <span style="color: #718096;">2023年10月15日</span>
+            </div>
+            <div class="settings-item">
+                <span>情感记忆</span>
+                <span style="color: #718096;">开启</span>
+            </div>
+            <div class="settings-item">
+                <span>学习能力</span>
+                <span style="color: #718096;">高级</span>
+            </div>
+            <div class="settings-item">
+                <span>陪伴模式</span>
+                <span style="color: #718096;">全天候</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav">
+        <div class="nav-item active" data-page="chat-page">
+            <div class="nav-icon">💬</div>
+            <div class="nav-label">聊天</div>
+        </div>
+        <div class="nav-item" data-page="settings-page">
+            <div class="nav-icon">⚙️</div>
+            <div class="nav-label">设置</div>
+        </div>
+        <div class="nav-item" data-page="profile-page">
+            <div class="nav-icon">👤</div>
+            <div class="nav-label">资料</div>
+        </div>
+    </div>
+
+    <script>
+        // 页面切换功能
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // 更新导航激活状态
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // 切换页面
+                const pageId = this.getAttribute('data-page');
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.getElementById(pageId).classList.add('active');
+            });
+        });
+        
+        // 聊天功能
+        const chatContainer = document.getElementById('chat-container');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+        
+        // 发送消息
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message === '') return;
+
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.innerHTML = `<div class="message-content">${message}</div>`;
+            chatContainer.appendChild(userMessage);
+
+            messageInput.value = '';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            typingIndicator.style.display = 'block';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                const resp = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: 'system', content: '你是一个温暖的中文AI伴侣，擅长共情与陪伴。' },
+                            { role: 'user', content: message }
+                        ]
+                    })
+                });
+
+                typingIndicator.style.display = 'none';
+
+                if (!resp.ok) {
+                    const errText = await resp.text();
+                    const aiMessage = document.createElement('div');
+                    aiMessage.className = 'message ai-message';
+                    aiMessage.innerHTML = `
+                        <div class="avatar">AI</div>
+                        <div class="message-content">出错了：${errText}</div>
+                    `;
+                    chatContainer.appendChild(aiMessage);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    return;
+                }
+
+                const { content } = await resp.json();
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'message ai-message';
+                aiMessage.innerHTML = `
+                    <div class="avatar">AI</div>
+                    <div class="message-content">${content}</div>
+                `;
+                chatContainer.appendChild(aiMessage);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            } catch (e) {
+                typingIndicator.style.display = 'none';
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'message ai-message';
+                aiMessage.innerHTML = `
+                    <div class="avatar">AI</div>
+                    <div class="message-content">网络异常，请稍后再试。</div>
+                `;
+                chatContainer.appendChild(aiMessage);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+        
+        // 发送按钮点击事件
+        sendButton.addEventListener('click', sendMessage);
+        
+        // 输入框回车事件
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // 初始滚动到底部
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    </script>
+</body>
+</html>
