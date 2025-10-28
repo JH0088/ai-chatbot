@@ -14,7 +14,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Missing OPENROUTER_API_KEY' });
     }
 
-    const model = 'meta-llama/llama-3.1-8b-instruct:free'; // 也可：'google/gemma-2-9b-it:free' 或 'openrouter/auto'
+    const model = 'openrouter/auto'; // 也可：'google/gemma-2-9b-it:free' 或 'openrouter/auto'
     const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -43,3 +43,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: String(e) });
   }
 }
+
